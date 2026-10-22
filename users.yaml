@@ -1,4 +1,43 @@
 apiVersion: backstage.io/v1alpha1
+kind: Group
+metadata:
+  name: lab-students
+spec:
+  type: team
+  members:
+    - student-00
+    - student-01
+    - student-02
+    - student-03
+    - student-04
+    - student-05
+    - student-06
+    - student-07
+    - student-08
+    - student-09
+    - student-10
+    - student-11
+    - student-12
+    - student-13
+    - student-14
+    - student-15
+    - student-16
+    - student-17
+    - student-18
+    - student-19
+    - student-20
+    - student-21
+    - student-22
+    - student-23
+    - student-24
+    - student-25
+    - student-26
+    - student-27
+    - student-28
+    - student-29
+    - student-30
+---
+apiVersion: backstage.io/v1alpha1
 kind: User
 metadata:
   name: student-00
@@ -25,5 +64,285 @@ metadata:
 spec:
   profile:
     displayName: Student 02
+  memberOf:
+    - lab-students
+---
+apiVersion: backstage.io/v1alpha1
+kind: User
+metadata:
+  name: student-03
+spec:
+  profile:
+    displayName: Student 03
+  memberOf:
+    - lab-students
+---
+apiVersion: backstage.io/v1alpha1
+kind: User
+metadata:
+  name: student-04
+spec:
+  profile:
+    displayName: Student 04
+  memberOf:
+    - lab-students
+---
+apiVersion: backstage.io/v1alpha1
+kind: User
+metadata:
+  name: student-05
+spec:
+  profile:
+    displayName: Student 05
+  memberOf:
+    - lab-students
+---
+apiVersion: backstage.io/v1alpha1
+kind: User
+metadata:
+  name: student-06
+spec:
+  profile:
+    displayName: Student 06
+  memberOf:
+    - lab-students
+---
+apiVersion: backstage.io/v1alpha1
+kind: User
+metadata:
+  name: student-07
+spec:
+  profile:
+    displayName: Student 07
+  memberOf:
+    - lab-students
+---
+apiVersion: backstage.io/v1alpha1
+kind: User
+metadata:
+  name: student-08
+spec:
+  profile:
+    displayName: Student 08
+  memberOf:
+    - lab-students
+---
+apiVersion: backstage.io/v1alpha1
+kind: User
+metadata:
+  name: student-09
+spec:
+  profile:
+    displayName: Student 09
+  memberOf:
+    - lab-students
+---
+apiVersion: backstage.io/v1alpha1
+kind: User
+metadata:
+  name: student-10
+spec:
+  profile:
+    displayName: Student 10
+  memberOf:
+    - lab-students
+---
+apiVersion: backstage.io/v1alpha1
+kind: User
+metadata:
+  name: student-11
+spec:
+  profile:
+    displayName: Student 11
+  memberOf:
+    - lab-students
+---
+apiVersion: backstage.io/v1alpha1
+kind: User
+metadata:
+  name: student-12
+spec:
+  profile:
+    displayName: Student 12
+  memberOf:
+    - lab-students
+---
+apiVersion: backstage.io/v1alpha1
+kind: User
+metadata:
+  name: student-13
+spec:
+  profile:
+    displayName: Student 13
+  memberOf:
+    - lab-students
+---
+apiVersion: backstage.io/v1alpha1
+kind: User
+metadata:
+  name: student-14
+spec:
+  profile:
+    displayName: Student 14
+  memberOf:
+    - lab-students
+---
+apiVersion: backstage.io/v1alpha1
+kind: User
+metadata:
+  name: student-15
+spec:
+  profile:
+    displayName: Student 15
+  memberOf:
+    - lab-students
+---
+apiVersion: backstage.io/v1alpha1
+kind: User
+metadata:
+  name: student-16
+spec:
+  profile:
+    displayName: Student 16
+  memberOf:
+    - lab-students
+---
+apiVersion: backstage.io/v1alpha1
+kind: User
+metadata:
+  name: student-17
+spec:
+  profile:
+    displayName: Student 17
+  memberOf:
+    - lab-students
+---
+apiVersion: backstage.io/v1alpha1
+kind: User
+metadata:
+  name: student-18
+spec:
+  profile:
+    displayName: Student 18
+  memberOf:
+    - lab-students
+---
+apiVersion: backstage.io/v1alpha1
+kind: User
+metadata:
+  name: student-19
+spec:
+  profile:
+    displayName: Student 19
+  memberOf:
+    - lab-students
+---
+apiVersion: backstage.io/v1alpha1
+kind: User
+metadata:
+  name: student-20
+spec:
+  profile:
+    displayName: Student 20
+  memberOf:
+    - lab-students
+---
+apiVersion: backstage.io/v1alpha1
+kind: User
+metadata:
+  name: student-21
+spec:
+  profile:
+    displayName: Student 21
+  memberOf:
+    - lab-students
+---
+apiVersion: backstage.io/v1alpha1
+kind: User
+metadata:
+  name: student-22
+spec:
+  profile:
+    displayName: Student 22
+  memberOf:
+    - lab-students
+---
+apiVersion: backstage.io/v1alpha1
+kind: User
+metadata:
+  name: student-23
+spec:
+  profile:
+    displayName: Student 23
+  memberOf:
+    - lab-students
+---
+apiVersion: backstage.io/v1alpha1
+kind: User
+metadata:
+  name: student-24
+spec:
+  profile:
+    displayName: Student 24
+  memberOf:
+    - lab-students
+---
+apiVersion: backstage.io/v1alpha1
+kind: User
+metadata:
+  name: student-25
+spec:
+  profile:
+    displayName: Student 25
+  memberOf:
+    - lab-students
+---
+apiVersion: backstage.io/v1alpha1
+kind: User
+metadata:
+  name: student-26
+spec:
+  profile:
+    displayName: Student 26
+  memberOf:
+    - lab-students
+---
+apiVersion: backstage.io/v1alpha1
+kind: User
+metadata:
+  name: student-27
+spec:
+  profile:
+    displayName: Student 27
+  memberOf:
+    - lab-students
+---
+apiVersion: backstage.io/v1alpha1
+kind: User
+metadata:
+  name: student-28
+spec:
+  profile:
+    displayName: Student 28
+  memberOf:
+    - lab-students
+---
+apiVersion: backstage.io/v1alpha1
+kind: User
+metadata:
+  name: student-29
+spec:
+  profile:
+    displayName: Student 29
+  memberOf:
+    - lab-students
+---
+apiVersion: backstage.io/v1alpha1
+kind: User
+metadata:
+  name: student-30
+spec:
+  profile:
+    displayName: Student 30
   memberOf:
     - lab-students
