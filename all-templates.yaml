@@ -1,0 +1,8 @@
+apiVersion: backstage.io/v1alpha1
+kind: Location
+metadata:
+  name: lab-3336-templates
+  description: TechXchange Lab 3336 - API Gateway as Code Templates
+spec:
+  targets:
+    - ./template.yaml
