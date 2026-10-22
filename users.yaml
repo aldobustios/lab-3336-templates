@@ -1,0 +1,29 @@
+apiVersion: backstage.io/v1alpha1
+kind: User
+metadata:
+  name: student-00
+spec:
+  profile:
+    displayName: Instructor
+  memberOf:
+    - lab-students
+---
+apiVersion: backstage.io/v1alpha1
+kind: User
+metadata:
+  name: student-01
+spec:
+  profile:
+    displayName: Student 01
+  memberOf:
+    - lab-students
+---
+apiVersion: backstage.io/v1alpha1
+kind: User
+metadata:
+  name: student-02
+spec:
+  profile:
+    displayName: Student 02
+  memberOf:
+    - lab-students
