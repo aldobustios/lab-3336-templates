@@ -1,33 +1,183 @@
 ---
-- name: Configure DataPower Nano Gateway
+- name: Create and Publish API in APIC
   hosts: localhost
   connection: local
   gather_facts: false
 
   vars:
-    gateway_name: "${{ values.namespace }}-${{ values.gateway_name }}"
-    namespace: "${{ values.namespace }}"
-    environment: "${{ values.environment }}"
-    k8s_api: "https://api.itz-jyz46m.infra01-lb.wdc07.techzone.ibm.com:6443"
+    apic_platform_endpoint: "https://apic-lab-mgmt-platform-api-apic.apps.itz-jyz46m.infra01-lb.wdc07.techzone.ibm.com"
+    apic_manager_endpoint: "https://apic-lab-mgmt-api-manager-apic.apps.itz-jyz46m.infra01-lb.wdc07.techzone.ibm.com"
+    apic_org_name: "lab-organization"
+    apic_org_id: "0d6d16d4-dab5-48b2-880c-803ce4a70592"
+    api_name: "${{ values.namespace }}-${{ values.gateway_name }}"
+    catalog_name: "${{ values.namespace }}-catalog"
 
   tasks:
-    - name: Wait for DataPowerService to be ready
-      shell: |
-        for i in $(seq 1 20); do
-          STATUS=$(curl -sk \
-            -H "Authorization: Bearer $(cat /var/run/secrets/kubernetes.io/serviceaccount/token)" \
-            "{{ k8s_api }}/apis/datapower.ibm.com/v1beta3/namespaces/{{ namespace }}/datapowerservices/{{ gateway_name }}" \
-            | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('status',{}).get('phase','Unknown'))" 2>/dev/null)
-          echo "Attempt $i: Status = $STATUS"
-          if [ "$STATUS" = "Running" ]; then
-            echo "Gateway is ready!"
-            exit 0
-          fi
-          sleep 15
-        done
-        echo "Gateway did not reach Running state in time - continuing anyway"
-        exit 0
+    - name: Get APIC token
+      uri:
+        url: "{{ apic_platform_endpoint }}/api/token"
+        method: POST
+        body_format: json
+        validate_certs: false
+        headers:
+          Accept: "application/json"
+        body:
+          username: "{{ apic_username }}"
+          password: "{{ apic_password }}"
+          realm: "provider/default-idp-2"
+          client_id: "caa87d9a-8cd7-4686-8b6e-ee2cdc5ee267"
+          client_secret: "3ecff363-7eb3-44be-9e07-6d4386c48b0b"
+          grant_type: password
+        status_code: 200
+      register: token_response
 
-    - name: Print gateway info
+    - name: Set token fact
+      set_fact:
+        apic_token: "{{ token_response.json.access_token }}"
+
+    - name: Delete existing Draft Product if exists
+      uri:
+        url: "{{ apic_manager_endpoint }}/api/orgs/{{ apic_org_name }}/drafts/draft-products/{{ api_name }}-product/1.0.0"
+        method: DELETE
+        validate_certs: false
+        headers:
+          Authorization: "Bearer {{ apic_token }}"
+          Accept: "application/json"
+        status_code: [200, 404]
+      ignore_errors: true
+
+    - name: Delete existing Draft API if exists
+      uri:
+        url: "{{ apic_manager_endpoint }}/api/orgs/{{ apic_org_name }}/drafts/draft-apis/{{ api_name }}/1.0.0"
+        method: DELETE
+        validate_certs: false
+        headers:
+          Authorization: "Bearer {{ apic_token }}"
+          Accept: "application/json"
+        status_code: [200, 404]
+      ignore_errors: true
+
+    - name: Create Draft API
+      uri:
+        url: "{{ apic_manager_endpoint }}/api/orgs/{{ apic_org_name }}/drafts/draft-apis"
+        method: POST
+        body_format: json
+        validate_certs: false
+        headers:
+          Authorization: "Bearer {{ apic_token }}"
+          Accept: "application/json"
+        body:
+          draft_api:
+            info:
+              title: "{{ api_name }}"
+              version: "1.0.0"
+              x-ibm-name: "{{ api_name }}"
+            openapi: "3.0.0"
+            paths:
+              /hello:
+                get:
+                  summary: "Hello World"
+                  operationId: "hello-get"
+                  responses:
+                    "200":
+                      description: "OK"
+            x-ibm-configuration:
+              gateway: "datapower-api-gateway"
+              type: "rest"
+              phase: "realized"
+              enforced: true
+              cors:
+                enabled: true
+              assembly:
+                execute:
+                  - invoke:
+                      title: "invoke"
+                      version: "2.0.0"
+                      target-url: "https://httpbin.org/get"
+                      timeout: 60
+                      verb: "keep"
+        status_code: 201
+      register: draft_api_response
+
+    - name: Print Draft API ID
       debug:
-        msg: "Gateway {{ gateway_name }} deployed in namespace {{ namespace }} (environment: {{ environment }})"
+        msg: "Draft API created: {{ draft_api_response.json.id }}"
+
+    - name: Get all catalogs
+      uri:
+        url: "{{ apic_platform_endpoint }}/api/orgs/{{ apic_org_id }}/catalogs"
+        method: GET
+        validate_certs: false
+        headers:
+          Authorization: "Bearer {{ apic_token }}"
+          Accept: "application/json"
+        status_code: 200
+      register: catalogs_response
+
+    - name: Set catalog ID fact
+      set_fact:
+        catalog_id: "{{ (catalogs_response.json.results | selectattr('name', 'equalto', catalog_name) | first).id }}"
+
+    - name: Print catalog ID
+      debug:
+        msg: "Catalog ID: {{ catalog_id }}"
+
+    - name: Create Draft Product
+      uri:
+        url: "{{ apic_manager_endpoint }}/api/orgs/{{ apic_org_name }}/drafts/draft-products"
+        method: POST
+        body_format: json
+        validate_certs: false
+        headers:
+          Authorization: "Bearer {{ apic_token }}"
+          Accept: "application/json"
+        body:
+          draft_product:
+            info:
+              title: "{{ api_name }}-product"
+              name: "{{ api_name }}-product"
+              version: "1.0.0"
+            product: "1.0.0"
+            visibility:
+              view:
+                type: "public"
+              subscribe:
+                type: "authenticated"
+            apis:
+              "{{ api_name }}":
+                name: "{{ api_name }}:1.0.0"
+            plans:
+              default-plan:
+                title: "Default Plan"
+                rate-limits:
+                  default:
+                    value: "100/1hour"
+        status_code: 201
+      register: draft_product_response
+
+    - name: Print Draft Product ID
+      debug:
+        msg: "Draft Product created: {{ draft_product_response.json.id }}"
+
+    - name: Publish Product to catalog
+      uri:
+        url: "{{ apic_platform_endpoint }}/api/catalogs/{{ apic_org_id }}/{{ catalog_id }}/publish-draft-product"
+        method: POST
+        body_format: json
+        validate_certs: false
+        headers:
+          Authorization: "Bearer {{ apic_token }}"
+          Accept: "application/json"
+        body:
+          draft_product_url: "{{ apic_platform_endpoint }}/api/orgs/{{ apic_org_id }}/drafts/draft-products/{{ draft_product_response.json.id }}"
+        status_code: 201
+      register: publish_response
+
+    - name: Print success
+      debug:
+        msg: |
+          API publicado exitosamente!
+          Catalog: {{ catalog_name }}
+          API: {{ api_name }}
+          State: {{ publish_response.json.state }}
+          URL: https://apic-lab-gw-gateway-apic.apps.itz-jyz46m.infra01-lb.wdc07.techzone.ibm.com/lab-organization/{{ catalog_name }}/hello
