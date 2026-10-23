@@ -2,8 +2,8 @@ apiVersion: scaffolder.backstage.io/v1beta3
 kind: Template
 metadata:
   name: apic-nano-gateway
-  title: DataPower Nano Gateway
-  description: Provision an IBM API Connect DataPower Nano Gateway using Terraform and Ansible
+  title: API Gateway as Code
+  description: Crea un API en IBM API Connect usando Terraform y Ansible
   tags:
     - apic
     - gateway
@@ -14,44 +14,52 @@ spec:
   type: gateway
 
   parameters:
-    - title: Gateway Configuration
+    - title: Configuración del API
       required:
         - gateway_name
-        - environment
-        - replicas
-      properties:
-        gateway_name:
-          title: Gateway Name
-          type: string
-          description: Name for your gateway (e.g. my-nano-gw)
-          pattern: '^[a-z0-9-]+$'
-          ui:autofocus: true
-        environment:
-          title: Environment
-          type: string
-          description: Target environment
-          default: dev
-          enum:
-            - dev
-            - staging
-            - production
-        replicas:
-          title: Replicas
-          type: integer
-          description: Number of gateway replicas
-          default: 1
-          minimum: 1
-          maximum: 3
-
-    - title: Student Information
-      required:
         - namespace
       properties:
-        namespace:
-          title: Your Namespace
+        gateway_name:
+          title: Nombre del API
           type: string
-          description: Your assigned namespace (e.g. student-07)
-          ui:field: EntityNamePicker
+          description: Nombre para tu API (solo letras minúsculas y guiones, ej. my-api)
+          pattern: '^[a-z0-9-]+$'
+          ui:autofocus: true
+        namespace:
+          title: Tu Namespace
+          type: string
+          description: Tu namespace asignado
+          enum:
+            - student-01
+            - student-02
+            - student-03
+            - student-04
+            - student-05
+            - student-06
+            - student-07
+            - student-08
+            - student-09
+            - student-10
+            - student-11
+            - student-12
+            - student-13
+            - student-14
+            - student-15
+            - student-16
+            - student-17
+            - student-18
+            - student-19
+            - student-20
+            - student-21
+            - student-22
+            - student-23
+            - student-24
+            - student-25
+            - student-26
+            - student-27
+            - student-28
+            - student-29
+            - student-30
 
   steps:
     - id: fetch-base
@@ -61,8 +69,6 @@ spec:
         url: ./skeleton
         values:
           gateway_name: ${{ parameters.gateway_name }}
-          environment: ${{ parameters.environment }}
-          replicas: ${{ parameters.replicas }}
           namespace: ${{ parameters.namespace }}
 
     - id: publish
@@ -70,9 +76,42 @@ spec:
       action: publish:github
       input:
         allowedHosts: ['github.com']
-        description: Gateway ${{ parameters.gateway_name }} for ${{ parameters.namespace }}
+        description: API ${{ parameters.gateway_name }} for ${{ parameters.namespace }}
         repoUrl: github.com?owner=aldobustios&repo=${{ parameters.namespace }}-${{ parameters.gateway_name }}
         defaultBranch: main
+
+    - id: run-pipeline
+      name: Run Tekton Pipeline
+      action: kubernetes:apply
+      input:
+        namespaced: true
+        clusterRef: in-cluster
+        manifest: |
+          apiVersion: tekton.dev/v1beta1
+          kind: PipelineRun
+          metadata:
+            generateName: gateway-run-
+            namespace: ${{ parameters.namespace }}
+          spec:
+            pipelineRef:
+              name: gateway-provisioning-pipeline
+            params:
+              - name: git-url
+                value: ${{ steps.publish.output.remoteUrl }}
+              - name: gateway-name
+                value: ${{ parameters.gateway_name }}
+              - name: namespace
+                value: ${{ parameters.namespace }}
+            workspaces:
+              - name: shared-workspace
+                volumeClaimTemplate:
+                  spec:
+                    accessModes:
+                      - ReadWriteOnce
+                    resources:
+                      requests:
+                        storage: 1Gi
+                    storageClassName: ocs-storagecluster-ceph-rbd
 
     - id: register
       name: Register in Catalog
@@ -83,8 +122,10 @@ spec:
 
   output:
     links:
-      - title: GitHub Repository
+      - title: Repositorio GitHub
         url: ${{ steps.publish.output.remoteUrl }}
-      - title: Open in Catalog
+      - title: Ver en Catálogo
         icon: catalog
         entityRef: ${{ steps.register.output.entityRef }}
+      - title: API en APIC
+        url: https://apic-lab-gw-gateway-apic.apps.itz-jyz46m.infra01-lb.wdc07.techzone.ibm.com/lab-organization/${{ parameters.namespace }}-catalog/hello
