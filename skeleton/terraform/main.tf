@@ -1,55 +1,55 @@
 terraform {
   required_providers {
-    kubernetes = {
-      source  = "hashicorp/kubernetes"
-      version = "~> 2.25"
+    null = {
+      source  = "hashicorp/null"
+      version = "~> 3.0"
     }
   }
 }
 
-provider "kubernetes" {
-  host                   = var.k8s_host
-  token                  = var.k8s_token
-  cluster_ca_certificate = base64decode(var.k8s_ca_cert)
+locals {
+  catalog_name = "${{ values.namespace }}-catalog"
 }
 
-resource "kubernetes_manifest" "gateway" {
-  manifest = {
-    apiVersion = "datapower.ibm.com/v1beta3"
-    kind       = "DataPowerService"
-    metadata = {
-      name      = "${{ values.namespace }}-${{ values.gateway_name }}"
-      namespace = "${{ values.namespace }}"
-      labels = {
-        app         = "${{ values.gateway_name }}"
-        environment = "${{ values.environment }}"
-        owner       = "${{ values.namespace }}"
-      }
-    }
-    spec = {
-      replicas = ${{ values.replicas }}
-      version  = "10.5.0.10"
-      license = {
-        accept     = true
-        use        = "nonproduction"
-        license    = "L-RJON-CCAT5F"
-      }
-      users = [{
-        name              = "admin"
-        accessLevel       = "privileged"
-        passwordSecret    = "datapower-admin-credentials"
-      }]
-      gateway = {
-        enabled = true
-      }
-    }
+resource "null_resource" "apic_catalog" {
+  triggers = {
+    always_run = timestamp()
   }
-}
 
-output "gateway_name" {
-  value = "${{ values.namespace }}-${{ values.gateway_name }}"
-}
+  provisioner "local-exec" {
+    command = <<EOT
+set -e
 
-output "gateway_namespace" {
-  value = "${{ values.namespace }}"
+echo "Using username: $TF_VAR_apic_username"
+echo "Password length: $(echo -n "$TF_VAR_apic_password" | wc -c)"
+
+TOKEN_RESPONSE=$(curl -sk -X POST \
+  "https://apic-lab-mgmt-platform-api-apic.apps.itz-jyz46m.infra01-lb.wdc07.techzone.ibm.com/api/token" \
+  -H "Content-Type: application/json" \
+  -d "{
+    \"username\": \"$TF_VAR_apic_username\",
+    \"password\": \"$TF_VAR_apic_password\",
+    \"realm\": \"provider/default-idp-2\",
+    \"client_id\": \"caa87d9a-8cd7-4686-8b6e-ee2cdc5ee267\",
+    \"client_secret\": \"3ecff363-7eb3-44be-9e07-6d4386c48b0b\",
+    \"grant_type\": \"password\"
+  }")
+
+echo "TOKEN RESPONSE: $TOKEN_RESPONSE"
+
+TOKEN=$(echo $TOKEN_RESPONSE | python3 -c "import sys,json; print(json.load(sys.stdin)['access_token'])")
+
+RESULT=$(curl -sk -X POST \
+  "https://apic-lab-mgmt-platform-api-apic.apps.itz-jyz46m.infra01-lb.wdc07.techzone.ibm.com/api/orgs/lab-organization/catalogs" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d "{
+    \"name\": \"${{ values.namespace }}-catalog\",
+    \"title\": \"${{ values.namespace }} Catalog\"
+  }")
+
+echo "Catalog result: $RESULT"
+echo $RESULT | python3 -c "import sys,json; d=json.load(sys.stdin); print('CATALOG_ID=' + d.get('id','ERROR'))"
+EOT
+  }
 }
