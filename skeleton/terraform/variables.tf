@@ -1,39 +1,23 @@
-variable "k8s_host" {
-  description = "Kubernetes API server URL"
-  type        = string
-  default     = "https://api.itz-jyz46m.infra01-lb.wdc07.techzone.ibm.com:6443"
-}
-
-variable "k8s_token" {
-  description = "Kubernetes service account token"
+variable "apic_username" {
+  description = "APIC labadmin username"
   type        = string
   sensitive   = true
 }
 
-variable "k8s_ca_cert" {
-  description = "Kubernetes cluster CA certificate (base64)"
+variable "apic_password" {
+  description = "APIC labadmin password"
   type        = string
   sensitive   = true
-}
-
-variable "gateway_name" {
-  description = "Name of the gateway"
-  type        = string
 }
 
 variable "namespace" {
-  description = "Student namespace in OpenShift"
+  description = "Student namespace"
   type        = string
+  default     = "${{ values.namespace }}"
 }
 
-variable "environment" {
-  description = "Target environment: dev, staging or production"
+variable "gateway_name" {
+  description = "Name of the API"
   type        = string
-  default     = "dev"
-}
-
-variable "replicas" {
-  description = "Number of gateway replicas"
-  type        = number
-  default     = 1
+  default     = "${{ values.gateway_name }}"
 }
