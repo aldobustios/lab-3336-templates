@@ -32,7 +32,7 @@ resource "kubernetes_manifest" "gateway" {
       license = {
         accept     = true
         use        = "nonproduction"
-        license    = "L-ACRR-ZTMKXU"
+        license    = "L-RJON-CCAT5F"
       }
       users = [{
         name              = "admin"
