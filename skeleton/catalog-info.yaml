@@ -11,7 +11,7 @@ metadata:
   tags:
     - gateway
     - apic
-    - ${{ values.environment }}
+    - production
   links:
     - url: https://apic-lab-mgmt-api-manager-apic.apps.itz-jyz46m.infra01-lb.wdc07.techzone.ibm.com
       title: API Connect Manager
@@ -20,7 +20,6 @@ metadata:
       title: ArgoCD
       icon: dashboard
 spec:
-  type: gateway
-  lifecycle: ${{ values.environment }}
+  type: service
+  lifecycle: production
   owner: ${{ values.namespace }}
-  system: apic-lab
