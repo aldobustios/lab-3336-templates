@@ -73,7 +73,7 @@ spec:
 
     - id: publish
       name: Publish to GitHub
-      action: publish:github
+      action: publish:github:pull-request
       input:
         allowedHosts: ['github.com']
         description: API ${{ parameters.gateway_name }} for ${{ parameters.namespace }}
