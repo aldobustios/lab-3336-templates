@@ -79,38 +79,17 @@ spec:
         repoUrl: github.com?owner=aldobustios&repo=${{ parameters.namespace }}-${{ parameters.gateway_name }}
         defaultBranch: main
 
-    - id: run-pipeline
-      name: Run Tekton Pipeline
-      action: kubernetes:apply
+    - id: webhook
+      name: Create Tekton Webhook
+      action: github:webhook
       input:
-        namespaced: true
-        clusterRef: in-cluster
-        manifest: |
-          apiVersion: tekton.dev/v1beta1
-          kind: PipelineRun
-          metadata:
-            generateName: gateway-run-
-            namespace: ${{ parameters.namespace }}
-          spec:
-            pipelineRef:
-              name: gateway-provisioning-pipeline
-            params:
-              - name: git-url
-                value: ${{ steps.publish.output.remoteUrl }}
-              - name: gateway-name
-                value: ${{ parameters.gateway_name }}
-              - name: namespace
-                value: ${{ parameters.namespace }}
-            workspaces:
-              - name: shared-workspace
-                volumeClaimTemplate:
-                  spec:
-                    accessModes:
-                      - ReadWriteOnce
-                    resources:
-                      requests:
-                        storage: 1Gi
-                    storageClassName: ocs-storagecluster-ceph-rbd
+        repoUrl: github.com?owner=aldobustios&repo=${{ parameters.namespace }}-${{ parameters.gateway_name }}
+        webhookUrl: http://el-github-listener-openshift-pipelines.apps.itz-jyz46m.infra01-lb.wdc07.techzone.ibm.com
+        webhookSecret: TechXchange2026Webhook
+        events:
+          - push
+        contentType: json
+        insecureSsl: true
 
     - id: register
       name: Register in Catalog
