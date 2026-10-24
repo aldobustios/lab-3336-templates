@@ -73,9 +73,10 @@ spec:
 
     - id: publish
       name: Publish to GitHub
-      action: publish:github:pull-request
+      action: publish:github
       input:
-        allowedHosts: ['github.com']
+        allowedHosts:
+          - github.com
         description: API ${{ parameters.gateway_name }} for ${{ parameters.namespace }}
         repoUrl: github.com?owner=aldobustios&repo=${{ parameters.namespace }}-${{ parameters.gateway_name }}
         defaultBranch: main
