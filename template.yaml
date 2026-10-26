@@ -78,6 +78,7 @@ spec:
         description: API ${{ parameters.gateway_name }} for ${{ parameters.namespace }}
         repoUrl: github.com?owner=aldobustios&repo=${{ parameters.namespace }}-${{ parameters.gateway_name }}
         defaultBranch: main
+        repoVisibility: public
 
     - id: webhook
       name: Create Tekton Webhook
