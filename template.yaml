@@ -99,6 +99,22 @@ spec:
         repoContentsUrl: ${{ steps.publish.output.repoContentsUrl }}
         catalogInfoPath: '/catalog-info.yaml'
 
+    - id: trigger-pipeline
+      name: Launch Tekton Pipeline
+      action: http:backstage:request
+      input:
+        endpoint: ''
+        proxyPath: ''
+        params:
+          url: http://el-github-listener.openshift-pipelines.svc.cluster.local:8080
+          method: POST
+          headers:
+            Content-Type: application/json
+          body:
+            repository:
+              name: ${{ parameters.namespace }}-${{ parameters.gateway_name }}
+              clone_url: https://github.com/aldobustios/${{ parameters.namespace }}-${{ parameters.gateway_name }}.git
+
   output:
     links:
       - title: Repositorio GitHub
