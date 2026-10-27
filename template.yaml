@@ -79,6 +79,7 @@ spec:
         repoUrl: github.com?owner=aldobustios&repo=${{ parameters.namespace }}-${{ parameters.gateway_name }}
         defaultBranch: main
         repoVisibility: public
+        protectDefaultBranch: false
 
     - id: webhook
       name: Create Tekton Webhook
